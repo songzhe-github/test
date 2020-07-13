@@ -13,11 +13,6 @@ use ip\IpLocation;
 
 class Monster extends Conmmon
 {
-    public function aaa()
-    {
-        return 222;
-    }
-
     /**
      * 获取code，返回openid
      */
