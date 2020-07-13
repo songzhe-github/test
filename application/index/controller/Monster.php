@@ -15,7 +15,7 @@ class Monster extends Conmmon
 {
     public function aaa()
     {
-        return 111;
+        return 222;
     }
 
     /**
