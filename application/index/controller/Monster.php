@@ -47,6 +47,7 @@ class Monster extends Conmmon
                 return jsonResult('请求成功', 200, $res);
             }
         }
+        return jsonResult('亲，你迷路了！', 110);
     }
 
     # 首页配置信息
