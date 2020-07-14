@@ -61,7 +61,7 @@ class Monster extends Conmmon
             foreach ($clerk_value['list'] as $clerk_key1 => $clerk_value1) {
                 if ($clerk_value1['status'] >= 1) {
                     $arr['clerk_lv'] = 0;
-                    $arr['clerk_plus'] = null;
+                    $arr['clerk_plus'] = 0.1;
                     $arr['clerk_floor'] = null;
                     $arr['clerk_position'] = null;
                     $arr['clerk_level'] = $clerk_value['clerk_level'];
