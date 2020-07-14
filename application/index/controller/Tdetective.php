@@ -55,12 +55,12 @@ class Tdetective extends Conmmon
 
         # 用户信息
         $userInfo = Db::table('TT_Detective_user')
-            ->field('openid,add_date,add_timestamp,offline_date', true)
+            ->field('openid,add_date,add_timestamp', true)
             ->where(['user_id' => $this->user_id])
             ->find();
         $userInfo['role'] = empty($userInfo['role']) ? [['lv' => 0, 'status' => 0], ['lv' => 0, 'status' => 0]] : json_decode($userInfo['role']);
 
-        $userInfo['free_num'] = date('Y-m-d', $userInfo['offline_timestamp']) < date('Y-m-d', time()) || empty($userInfo['offline_timestamp']) ? 3 : $userInfo['offline_time'];
+        $userInfo['free_num'] = date('Y-m-d', $userInfo['offline_timestamp']) < date('Y-m-d', time()) || empty($userInfo['offline_timestamp']) ? 3 : $userInfo['offline_timestamp'];
         $userInfo['isDressArr'] = empty($userInfo['isDressArr']) ? [0, 0, 0, 0] : json_decode($userInfo['isDressArr']);
 
         // 数据库默认家具
