@@ -64,7 +64,6 @@ class Monster extends Conmmon
                     $arr['clerk_floor'] = null;
                     $arr['clerk_position'] = null;
                     $arr['clerk_level'] = $clerk_value['clerk_level'];
-                    $arr['clerk_level'] = $clerk_value['clerk_level'];
                     $arr['clerk_name'] = $clerk_value1['clerk_name'];
                     $arr['status'] = $clerk_value1['status'];
                     $clerk[$clerk_key][] = $arr;
@@ -169,7 +168,7 @@ class Monster extends Conmmon
             'clerkInfo' => json_encode($userInfo['clerkInfo'], JSON_UNESCAPED_UNICODE),
             'snackInfo' => json_encode($userInfo['snackInfo'], JSON_UNESCAPED_UNICODE),
             'decorationInfo' => json_encode($userInfo['decorationInfo'], JSON_UNESCAPED_UNICODE),
-            'offline_time' => time(),
+            'offline_datetime' => time(),
         ];
 //        dump($upData);
         Db::table('Monster_user')->where(['user_id' => $this->user_id])->update($upData);
