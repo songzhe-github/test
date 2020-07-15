@@ -1,6 +1,6 @@
 <?php
 /**
- * WX酷玩跑车
+ * 妖怪小吃店
  * User: SongZhe
  * Date: 2019/8/13
  * Time: 17:02
@@ -95,12 +95,13 @@ class Monster extends Conmmon
         unset($snack_config);
         $userInfo['snackInfo'] = empty($userInfo['snackInfo']) ? $snack : json_decode($userInfo['snackInfo']);
 
-        # 小吃配置信息
+        # 装修配置信息
         $decoration_config = config('monster_config_decoration');
         $decoration = [];
         foreach ($decoration_config as $decoration_key => $decoration_value) {
             if ($decoration_value['status'] >= 1) {
                 $arr2['decoration_lv'] = 0;
+                $arr2['decoration_floor'] = 0.1;
                 $arr2['status'] = $decoration_value['status'];
                 $decoration[] = $arr2;
             }
