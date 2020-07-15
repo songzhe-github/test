@@ -84,6 +84,8 @@ class Monster extends Conmmon
             foreach ($snack_value['list'] as $snack_key1 => $snack_value1) {
                 if ($snack_value1['status'] >= 1) {
                     $arr1['snack_name'] = $snack_value1['snack_name'];
+                    $arr1['snack_coin'] = $snack_value1['snack_coin'];
+                    $arr1['snack_gouYu'] = $snack_value1['snack_gouYu'];
                     $arr1['snack_position'] = $snack_value1['snack_name'] == '臭豆腐' ? 1 : null;
                     $arr1['status'] = $snack_value1['status'];
                     $snack[$snack_key][] = $arr1;
