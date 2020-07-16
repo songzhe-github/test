@@ -7,7 +7,6 @@
  */
 
 namespace app\index\controller;
-
 use think\Db;
 use ip\IpLocation;
 
@@ -31,7 +30,7 @@ class Vivodetective extends Conmmon
             $db = Db::connect('multi-platform');
             $user = $db->table('VIVO_Detective_user')->field('user_id,openid')->where(['openid' => $data['openId']])->find();
             if (empty($user)) {
-                $num = substr(time(), -6);
+//                $num = substr(time(), -6);
                 $arr = [
                     'openid' => $data['openId'],
                     'user_name' => $data['nickName'],
