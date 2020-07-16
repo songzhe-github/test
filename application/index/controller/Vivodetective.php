@@ -29,23 +29,23 @@ class Vivodetective extends Conmmon
             $data = $this->getVIVOOpenid($pkgName, $token, $timestamp, $nonce, $appKey, $appSecret);
 
             $db = Db::connect('multi-platform');
-            $user = $db->table('VIVO_Detective_user')->field('user_id,openid')->where(['openid' => $data['openid']])->find();
+            $user = $db->table('VIVO_Detective_user')->field('user_id,openid')->where(['openid' => $data['openId']])->find();
             if (empty($user)) {
                 $num = substr(time(), -6);
                 $arr = [
-                    'openid' => $data['openid'],
-                    'user_name' => '游客' . $num,
+                    'openid' => $data['openId'],
+                    'user_name' => $data['nickName'],
                     'add_date' => date('Y-m-d'),
                     'add_timestamp' => time(),
                     'energyNum' => 10,
                     'is_impower' => 0,
                 ];
                 $uid = $db->table('VIVO_Detective_user')->insertGetId($arr);
-                $res['mstr'] = lock_url($data['openid'] . ',' . $uid);
+                $res['mstr'] = lock_url($data['openId'] . ',' . $uid);
                 return jsonResult('请求成功', 200, $res);
 
             } else {
-                $res['mstr'] = lock_url($data['openid'] . ',' . $user['user_id']);
+                $res['mstr'] = lock_url($data['openId'] . ',' . $user['user_id']);
                 return jsonResult('请求成功', 200, $res);
             }
         }
