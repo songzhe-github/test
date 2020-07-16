@@ -19,11 +19,14 @@ class Vivodetective extends Conmmon
     public function getCode()
     {
         if (request()->isPost()) {
-            $code = input('post.code');
-            if (empty($code)) return jsonResult('你瞅啥', 100);
-            $appid = 'tte2e0945d7ddad325';
-            $appsecret = 'd0ac9c00dcca94f45d1e7a58ce1be96292ea1770';
-            $data = $this->getTTOpenid($appid, $appsecret, $code); // 获得 openid 和 session_key
+            $token = input('post.token');
+            if (empty($token)) return jsonResult('你瞅啥', 100);
+            $pkgName = 'com.blm.thzt.vivominigame';
+            $timestamp = time() * 1000;
+            $nonce = setrandomNumber();
+            $appKey = 'f6e9bc7d5970e09270d27720178c37b3';
+            $appSecret = '12f799e2a0b878e018f1a778ea970d30';
+            $data = $this->getVIVOOpenid($pkgName, $token, $timestamp, $nonce, $appKey, $appSecret);
 
             $db = Db::connect('multi-platform');
             $user = $db->table('VIVO_Detective_user')->field('user_id,openid')->where(['openid' => $data['openid']])->find();
@@ -150,7 +153,7 @@ class Vivodetective extends Conmmon
 
         # 排行榜 - 关卡
         $rank_pass = $db->table('VIVO_Detective_rank_pass')->field('user_id,user_name,max_pass')->select();
-        $userIds = array_column($rank_pass, 'user_id');
+        $userIds = array_column((array)$rank_pass, 'user_id');
         $is_rank = array_keys($userIds, $this->user_id);
         $user = $db->table('VIVO_Detective_user')->field('user_id,user_name,max_pass')->where(['user_id' => $this->user_id])->find();
         if (empty($is_rank)) {
@@ -166,7 +169,7 @@ class Vivodetective extends Conmmon
 
         # 排行榜 - 装扮值
         $rank_dress = $db->table('VIVO_Detective_rank_dress')->field('user_id,user_name,dress_value')->select();
-        $userIds1 = array_column($rank_dress, 'user_id');
+        $userIds1 = array_column((array)$rank_dress, 'user_id');
         $is_rank = array_keys($userIds1, $this->user_id);
         $user = $db->table('VIVO_Detective_user')->field('user_id,user_name,dress_value')->where(['user_id' => $this->user_id])->find();
         if (empty($is_rank)) {
@@ -208,7 +211,7 @@ class Vivodetective extends Conmmon
     {
         $db = Db::connect('multi-platform');
         $rank_pass = $db->table('VIVO_Detective_rank_pass')->field('user_id,user_name,max_pass')->select();
-        $userIds = array_column($rank_pass, 'user_id');
+        $userIds = array_column((array)$rank_pass, 'user_id');
         $is_rank = array_keys($userIds, $this->user_id);
 
         $user = $db->table('VIVO_Detective_user')->field('user_id,user_name,max_pass')->where(['user_id' => $this->user_id])->find();
@@ -224,7 +227,7 @@ class Vivodetective extends Conmmon
         $data['user_rank_pass'] = $user;
 
         $rank_dress = $db->table('VIVO_Detective_rank_dress')->field('user_id,user_name,dress_value')->select();
-        $userIds = array_column($rank_dress, 'user_id');
+        $userIds = array_column((array)$rank_dress, 'user_id');
         $is_rank = array_keys($userIds, $this->user_id);
 
         $user = $db->table('VIVO_Detective_user')->field('user_id,user_name,dress_value')->where(['user_id' => $this->user_id])->find();
