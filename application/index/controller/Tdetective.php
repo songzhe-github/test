@@ -59,8 +59,7 @@ class Tdetective extends Conmmon
             ->where(['user_id' => $this->user_id])
             ->find();
         $userInfo['role'] = empty($userInfo['role']) ? [['lv' => 0, 'status' => 0], ['lv' => 0, 'status' => 0]] : json_decode($userInfo['role']);
-
-        $userInfo['free_num'] = date('Y-m-d', $userInfo['offline_timestamp']) < date('Y-m-d', time()) || empty($userInfo['offline_timestamp']) ? 3 : $userInfo['offline_timestamp'];
+        $userInfo['free_num'] = date('Y-m-d', $userInfo['offline_timestamp']) < date('Y-m-d', time()) || empty($userInfo['free_num']) ? 3 : $userInfo['free_num'];
         $userInfo['isDressArr'] = empty($userInfo['isDressArr']) ? [0, 0, 0, 0] : json_decode($userInfo['isDressArr']);
 
         // 数据库默认家具
@@ -149,7 +148,7 @@ class Tdetective extends Conmmon
 
         # 排行榜 - 关卡
         $rank_pass = Db::table('TT_Detective_rank_pass')->field('user_id,user_name,max_pass')->select();
-        $userIds = array_column($rank_pass, 'user_id');
+        $userIds = array_column((array)$rank_pass, 'user_id');
         $is_rank = array_keys($userIds, $this->user_id);
         $user = Db::table('TT_Detective_user')->field('user_id,user_name,max_pass')->where(['user_id' => $this->user_id])->find();
         if (empty($is_rank)) {
@@ -197,6 +196,7 @@ class Tdetective extends Conmmon
             }
         }
 
+        $data['all_configInfo_status'] = $config['all_configInfo_status']; // 所有配置信息开关（关卡、探员、签到）
         $data['isCanErrorClick'] = $isCanErrorClick; // 误点开关
         $data['API'] = request()->action();
         return jsonResult('首页配置信息', 200, $data);
@@ -377,51 +377,34 @@ class Tdetective extends Conmmon
 
     public function demo()
     {
-        $userInfo = Db::table('TT_Detective_user')
-            ->field('openid,add_date,add_timestamp,offline_date,offline_timestamp', true)
-            ->where(['user_id' => $this->user_id])
-            ->find();
 
-        // 数据库默认家具
-        $roleArr = Db::table('TT_Detective_config_furniture')->field('id,furniture_id,status')->order('furniture_id')->select();
-        $roleArr = dataGroup($roleArr, 'furniture_id');
-        $DressClassArr['Sofa'] = $roleArr[0];
-        $DressClassArr['Drink'] = $roleArr[1];
-        $DressClassArr['Floor'] = $roleArr[2];
-        $DressClassArr['Wall'] = $roleArr[3];
-        if (empty($userInfo['Dress'])) {
-            // 新用户
-            $userInfo['Dress'] = $DressClassArr;
-        } else {
+        # 关卡配置
+        $passInfo = Db::table('TT_Detective_config_passInfo')->field('detective_id', true)->order('pass_id,question_id')->select();
+        $passInfoArr = dataGroup($passInfo, 'pass_id');
+        foreach ($passInfoArr as $kk => $vv) {
+            foreach ($vv as $key => $value) {
+                if (empty($value['answer'])) continue;
 
-            $UserDressArr1 = json_decode($userInfo['Dress'], true);
-            foreach ($DressClassArr as $DressArr_key => $DressArr_value) {
-                foreach ($UserDressArr1 as $UserDressArr_key1 => $UserDressArr_value1) {
-                    if ($DressArr_key == $UserDressArr_key1) {
-                        foreach ($DressArr_value as $kk1 => $vv1) {
-                            foreach ($UserDressArr_value1 as $kk2 => $vv2) {
-                                if ($vv1['id'] == $vv2['id']) {
-                                    $DressClassArr[$DressArr_key][$kk1]['status'] = $vv2['status'];
-                                }
-                            }
-                        }
-                    }
-                }
+                $answerArr = explode(',', $value['answer']);
+                $answer['posX'] = (int)$answerArr[0];
+                $answer['posY'] = (int)$answerArr[1];
+                $answer['radius'] = (int)$answerArr[2];
+                $passInfoArr[$kk][$key]['answer'] = $answer;
+
+                $prizeArr = explode(',', $value['prize']);
+                $prize['coin_num'] = (int)$prizeArr[0];
+                $passInfoArr[$kk][$key]['prize'] = $prize;
             }
-            $userInfo['Dress'] = $DressClassArr;
         }
+        $data['PassInfo'] = $passInfoArr;
 
-        // 家具配置
-        $roleArray = Db::table('TT_Detective_config_furniture')->field('id', true)->order('furniture_id')->select();
-        $roleArray = dataGroup($roleArray, 'furniture_id');
-        $DressArray['Sofa'] = $roleArray[0];
-        $DressArray['Drink'] = $roleArray[1];
-        $DressArray['Floor'] = $roleArray[2];
-        $DressArray['Wall'] = $roleArray[3];
-        $data['Dress'] = $DressArray;
+        //      # 店员配置信息
+//      $clerk = config('monster_config_clerk');
+        $clerk_json = json_encode($passInfoArr, JSON_UNESCAPED_UNICODE);
+        file_put_contents('Tdetective_config_passInfo.json', $clerk_json);
 
 
-        return jsonResult('', 200, $userInfo);
+        return jsonResult('', 200, $data);
     }
 
 }
