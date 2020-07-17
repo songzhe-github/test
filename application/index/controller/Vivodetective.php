@@ -63,7 +63,7 @@ class Vivodetective extends Conmmon
             ->find();
         $userInfo['role'] = empty($userInfo['role']) ? [['lv' => 0, 'status' => 0], ['lv' => 0, 'status' => 0]] : json_decode($userInfo['role']);
 
-        $userInfo['free_num'] = date('Y-m-d', $userInfo['offline_timestamp']) < date('Y-m-d', time()) || empty($userInfo['offline_timestamp']) ? 3 : $userInfo['offline_timestamp'];
+        $userInfo['free_num'] = date('Y-m-d', $userInfo['offline_timestamp']) < date('Y-m-d', time()) || empty($userInfo['free_num']) ? 3 : $userInfo['free_num'];
         $userInfo['isDressArr'] = empty($userInfo['isDressArr']) ? [0, 0, 0, 0] : json_decode($userInfo['isDressArr']);
 
         // 数据库默认家具
