@@ -33,7 +33,7 @@ class Tdetective extends Conmmon
                     'user_name' => '游客' . $num,
                     'add_date' => date('Y-m-d'),
                     'add_timestamp' => time(),
-                    'energyNum' => 10,
+                    'energyNum' => 5,
                     'free_num' => 3,
                     'is_impower' => 0,
                 ];
