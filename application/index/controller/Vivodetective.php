@@ -200,6 +200,7 @@ class Vivodetective extends Conmmon
             }
         }
 
+        $data['all_configInfo_status'] = $config['all_configInfo_status']; // 所有配置信息开关（关卡、探员、签到）
         $data['isCanErrorClick'] = $isCanErrorClick; // 误点开关
         $data['API'] = request()->action();
         return jsonResult('首页配置信息', 200, $data);
