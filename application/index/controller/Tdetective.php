@@ -34,6 +34,7 @@ class Tdetective extends Conmmon
                     'add_date' => date('Y-m-d'),
                     'add_timestamp' => time(),
                     'energyNum' => 10,
+                    'free_num' => 3,
                     'is_impower' => 0,
                 ];
                 $uid = Db::table('TT_Detective_user')->insertGetId($arr);
@@ -59,7 +60,7 @@ class Tdetective extends Conmmon
             ->where(['user_id' => $this->user_id])
             ->find();
         $userInfo['role'] = empty($userInfo['role']) ? [['lv' => 0, 'status' => 0], ['lv' => 0, 'status' => 0]] : json_decode($userInfo['role']);
-        $userInfo['free_num'] = date('Y-m-d', $userInfo['offline_timestamp']) < date('Y-m-d', time()) || empty($userInfo['free_num']) ? 3 : $userInfo['free_num'];
+        $userInfo['free_num'] = date('Y-m-d', $userInfo['offline_timestamp']) < date('Y-m-d', time()) ? 3 : $userInfo['free_num'];
         $userInfo['isDressArr'] = empty($userInfo['isDressArr']) ? [0, 0, 0, 0] : json_decode($userInfo['isDressArr']);
 
         // 数据库默认家具
