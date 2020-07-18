@@ -10,6 +10,7 @@ namespace app\index\controller;
 
 use think\Db;
 use ip\IpLocation;
+use think\Log;
 
 class Vivosnipe extends Conmmon
 {
@@ -28,21 +29,21 @@ class Vivosnipe extends Conmmon
             $appSecret = '7f45822d3222ade98476d1d04d738d60';
             $data = $this->getVIVOOpenid($pkgName, $token, $timestamp, $nonce, $appKey, $appSecret);
 
-            $user = Db::Table('TT_snipe_user')->field('user_id,openid')->where(['openid' => $data['openid']])->find();
-            $num = substr(time(), -6);
+            $db = Db::connect('multi-platform');
+            $user = $db->Table('VIVO_snipe_user')->field('user_id,openid')->where(['openid' => $data['openId']])->find();
             if (empty($user)) {
                 $arr = [
-                    'openid' => $data['openid'],
-                    'user_name' => '游客' . $num,
+                    'openid' => $data['openId'],
+                    'user_name' => $data['nickName'],
                     'max_pass' => 0,
                     'add_time' => date('Y-m-d'),
                 ];
-                $uid = Db::Table('TT_snipe_user')->insertGetId($arr);
-                $res['mstr'] = lock_url($data['openid'] . ',' . $uid);
+                $uid = $db->Table('VIVO_snipe_user')->insertGetId($arr);
+                $res['mstr'] = lock_url($data['openId'] . ',' . $uid);
                 return jsonResult('请求成功', 200, $res);
 
             } else {
-                $res['mstr'] = lock_url($data['openid'] . ',' . $user['user_id']);
+                $res['mstr'] = lock_url($data['openId'] . ',' . $user['user_id']);
                 return jsonResult('请求成功', 200, $res);
             }
         }
@@ -56,7 +57,8 @@ class Vivosnipe extends Conmmon
         $sex = input('post.sex');
         $city = input('post.city');
 
-        $user = Db::Table('TT_snipe_user')->where('user_id', $this->user_id)->value('user_id');
+        $db = Db::connect('multi-platform');
+        $user = $db->Table('VIVO_snipe_user')->where('user_id', $this->user_id)->value('user_id');
         if (empty($user)) return jsonResult('数据不存在', 100);
 
         $updata = [
@@ -66,7 +68,7 @@ class Vivosnipe extends Conmmon
             'city' => empty($city) ? '' : $city,
             'end_time' => date('Y-m-d H:i:s'),
         ];
-        Db::Table('TT_snipe_user')->where('user_id', $this->user_id)->update($updata);
+        $db->Table('VIVO_snipe_user')->where('user_id', $this->user_id)->update($updata);
         return jsonResult('用户信息', 200);
     }
 
@@ -79,7 +81,8 @@ class Vivosnipe extends Conmmon
         $data['share'] = config('share.snipe_share_pic');
 
         # 用户信息
-        $userInfo = Db::Table('TT_snipe_user')
+        $db = Db::connect('multi-platform');
+        $userInfo = $db->Table('VIVO_snipe_user')
             ->field('user_id,user_name,max_pass,coin,diamond,role_lv,skill_lv,selectGunInfo,gunInfo,new_player')
             ->where('user_id', $this->user_id)
             ->find();
@@ -87,7 +90,7 @@ class Vivosnipe extends Conmmon
         $userInfo['new_player'] = $userInfo['new_player'] ?? 0;
 
         # 武器库
-        $arsenal = Db::Table('TT_snipe_config_arsenal')->field('class_id,gun_name,lv,unlock_type,unlock_coin,unlock_video,video_num,is_unlock')->select();
+        $arsenal = $db->Table('VIVO_snipe_config_arsenal')->field('class_id,gun_name,lv,unlock_type,unlock_coin,unlock_video,video_num,is_unlock')->select();
         $arsenalArr = $this->dataGroup($arsenal, 'class_id');
         if (empty($userInfo['gunInfo'])) {
             // 新用户
@@ -111,7 +114,7 @@ class Vivosnipe extends Conmmon
         $data['userInfo'] = $userInfo;
 
         # 关卡配置信息
-        $snipePassInfo = Db::table('TT_snipe_config_passInfo')->order('Pass')->select();
+        $snipePassInfo = $db->table('VIVO_snipe_config_passInfo')->order('Pass')->select();
         foreach ($snipePassInfo as &$value) {
             $PassInfoArr = explode(',', trim($value['PassInfo']));
             if ($PassInfoArr) {
@@ -226,7 +229,7 @@ class Vivosnipe extends Conmmon
         $data['passInfo'] = $snipePassInfo;
 
         # 枪的配置信息
-        $snipeGunInfo = Db::table('TT_snipe_config_gunInfo')->field('rifleNo,sniperNo')->find();
+        $snipeGunInfo = $db->table('VIVO_snipe_config_gunInfo')->field('rifleNo,sniperNo')->find();
         $rifleNoArray = explode(';', trim($snipeGunInfo['rifleNo']));
         $rifleNoArray = array_filter($rifleNoArray);
         $rifleNo = [];
@@ -251,23 +254,23 @@ class Vivosnipe extends Conmmon
 
 
         # 军衔系统
-        $data['admiralRank'] = Db::table('TT_snipe_config_admiralRank')->field('lv,admiralRank_name,harm,probability,gem_num')->select();
+        $data['admiralRank'] = $db->table('VIVO_snipe_config_admiralRank')->field('lv,admiralRank_name,harm,probability,gem_num')->select();
 
         # 技能配置
-        $skillInfo = Db::table('TT_snipe_config_skill')->field('skill_name,skill_text,skill_level_name,skill_type,skill_number')->select();
+        $skillInfo = $db->table('VIVO_snipe_config_skill')->field('skill_name,skill_text,skill_level_name,skill_type,skill_number')->select();
         $data['skillInfo'] = $this->dataGroup($skillInfo, 'skill_type');
 
         # 被动技能配置
-        $skillInfo = Db::table('TT_snipe_config_skill_passive')->field('skill_name,skill_lv,skill_number,skill_harm')->select();
+        $skillInfo = $db->table('VIVO_snipe_config_skill_passive')->field('skill_name,skill_lv,skill_number,skill_harm')->select();
         $data['skillPassiveInfo'] = $skillInfo;
 
         # 签到列表
-        $signList = Db::table('TT_snipe_signlist')->field('day,num,type,status')->select();
-        $sign = Db::table('TT_snipe_sign')->where(['user_id' => $this->user_id, 'status' => 0])->select();
+        $signList = $db->table('VIVO_snipe_signlist')->field('day,num,type,status')->select();
+        $sign = $db->table('VIVO_snipe_sign')->where(['user_id' => $this->user_id, 'status' => 0])->select();
         $end = end($sign);
         if ($end['add_time'] < $this->date && count($sign) >= 7) {
             # 满一周status更新为0
-            Db::table('TT_snipe_sign')->where(['user_id' => $this->user_id])->update(['status' => 1]);
+            $db->table('VIVO_snipe_sign')->where(['user_id' => $this->user_id])->update(['status' => 1]);
             $sign = [];
         }
         foreach ($signList as &$value) {
@@ -283,7 +286,7 @@ class Vivosnipe extends Conmmon
         $data['signInfo'] = $signInfo;
 
         # 根据IP地址是否开启误点
-        $config = Db::Table('TT_snipe_config')->find();
+        $config = $db->Table('VIVO_snipe_config')->find();
         $isCanErrorClick = $config['isCanErrorClick'];
         if ($isCanErrorClick == 1) {
             $IP = request()->ip(0, true);
@@ -303,7 +306,6 @@ class Vivosnipe extends Conmmon
         return jsonResult('首页配置信息', 200, $data);
     }
 
-    # 点击签到
 
     protected function dataGroup($dataArr, $keyStr)
     {
@@ -318,11 +320,11 @@ class Vivosnipe extends Conmmon
         return $data;
     }
 
-    # 排行榜
-
+    # 点击签到
     public function drawSign()
     {
-        $user_sign = Db::table('TT_snipe_sign')->where(['user_id' => $this->user_id, 'status' => 0])->select();
+        $db = Db::connect('multi-platform');
+        $user_sign = $db->table('VIVO_snipe_sign')->where(['user_id' => $this->user_id, 'status' => 0])->select();
         $end = end($user_sign);
         if ($end['add_time'] == $this->date) return jsonResult('今日已签到过', 100);
 
@@ -333,19 +335,19 @@ class Vivosnipe extends Conmmon
             'add_time' => $this->date,
             'status' => 0,
         ];
-        Db::table('TT_snipe_sign')->insert($insert);
+        $db->table('VIVO_snipe_sign')->insert($insert);
         return jsonResult('签到成功', 200);
     }
 
-    # 离线
-
+    # 排行榜
     public function rank()
     {
-        $ranks = Db::Table('TT_snipe_rank_one')->field('user_id,user_name,max_pass')->select();
+        $db = Db::connect('multi-platform');
+        $ranks = $db->Table('VIVO_snipe_rank_one')->field('user_id,user_name,max_pass')->select();
         $userIds = array_column($ranks, 'user_id');
         $is_rank = array_keys($userIds, $this->user_id);
 
-        $user = Db::Table('TT_snipe_user')->field('user_name,max_pass')->where('user_id', $this->user_id)->find();
+        $user = $db->Table('VIVO_snipe_user')->field('user_name,max_pass')->where('user_id', $this->user_id)->find();
         if (empty($is_rank)) {
             $ranking = '30+';
         } else {
@@ -358,28 +360,29 @@ class Vivosnipe extends Conmmon
         return jsonResult('排行榜', 200, $data);
     }
 
-    # 渠道统计
-
+    # 离线
     public function offline()
     {
         if (empty($this->user_id)) return jsonResult('error', 110);
-        $userInfo = input('post.userInfo/a');
+        $userInfo = input('post.userInfo');
+        $userInfo = json_decode($userInfo, true);
+//        return jsonResult('离线成功', 200, $userInfo['gunInfo']);
         $upData = [
             'coin' => $userInfo['coin'],
             'diamond' => $userInfo['diamond'],
             'max_pass' => $userInfo['max_pass'],
             'role_lv' => $userInfo['role_lv'],
             'new_player' => $userInfo['new_player'],
-            'gunInfo' => json_encode($userInfo['gunInfo']),
-            'selectGunInfo' => json_encode($userInfo['selectGunInfo']),
+            'gunInfo' => json_encode($userInfo['gunInfo'], JSON_UNESCAPED_UNICODE),
+            'selectGunInfo' => json_encode($userInfo['selectGunInfo'], JSON_UNESCAPED_UNICODE),
             'offline_time' => date('Y-m-d H:i:s'),
         ];
-        Db::table('TT_snipe_user')->where('user_id', $this->user_id)->update($upData);
-        return jsonResult('离线成功', 200);
+        $db = Db::connect('multi-platform');
+        $db->table('VIVO_snipe_user')->where('user_id', $this->user_id)->update($upData);
+        return jsonResult('离线成功', 200, $upData);
     }
 
-    # 记录用户观看视频
-
+    # 渠道统计
     public function statistics_channel()
     {
         if (empty($this->user_id)) return jsonResult('error', 110);
@@ -387,7 +390,8 @@ class Vivosnipe extends Conmmon
         $post['enter_id'] = $post['enter_id'] ? $post['enter_id'] : 666;
         $date = date('Y-m-d');
 
-        $record_channel_id = Db::Table('TT_snipe_record_channel')->where(['user_id' => $this->user_id, 'add_date' => $date])->value('record_channel_id');
+        $db = Db::connect('multi-platform');
+        $record_channel_id = $db->Table('VIVO_snipe_record_channel')->where(['user_id' => $this->user_id, 'add_date' => $date])->value('record_channel_id');
         if (empty($record_channel_id)) {
             # 用户从哪个渠道进入
             $record = [
@@ -398,28 +402,33 @@ class Vivosnipe extends Conmmon
                 'add_date' => $date,
                 'add_time' => date('Y-m-d H:i:s'),
             ];
-            Db::Table('TT_snipe_record_channel')->insert($record);
+            $db->Table('VIVO_snipe_record_channel')->insert($record);
             return jsonResult('渠道统计成功', 200, $record);
         }
         return jsonResult('今日已统计', 100);
     }
 
-    # 根据某个字段分组
 
+    # 记录用户观看视频
     public function watchVideo()
     {
         $post = request()->only(['type', 'text', 'pass'], 'post');
         $post['user_id'] = $this->user_id;
         $post['add_time'] = date('Y-m-d');
         $post['timestamp'] = time();
-        Db::Table('TT_snipe_watch_video')->insert($post);
+        $db = Db::connect('multi-platform');
+        $db->Table('VIVO_snipe_watch_video')->insert($post);
         return jsonResult('记录成功', 200);
     }
 
     public function demo()
     {
+
+
+        return jsonResult('记录成功', 200);
         # 关卡配置信息
-        $snipePassInfo = Db::table('TT_snipe_config_passInfo')->select();
+        $db = Db::connect('multi-platform');
+        $snipePassInfo = $db->table('VIVO_snipe_config_passInfo')->select();
         foreach ($snipePassInfo as &$value) {
 
 
@@ -546,7 +555,7 @@ class Vivosnipe extends Conmmon
         $data['passInfo'] = $snipePassInfo;
 
 
-//        $snipeGunInfo = Db::table('TT_snipe_config_gunInfo')->field('rifleNo,sniperNo')->select();
+//        $snipeGunInfo = $db->table('VIVO_snipe_config_gunInfo')->field('rifleNo,sniperNo')->select();
 //        foreach ($snipeGunInfo as &$val) {
 //            $rifleNoArray = explode(';', $val['rifleNo']);
 //            $rifleNoArray = array_filter($rifleNoArray);
@@ -576,10 +585,6 @@ class Vivosnipe extends Conmmon
 
     public function test()
     {
-        # 技能配置
-        $skillInfo = Db::table('TT_snipe_config_skill')->field('skill_name,skill_text,skill_level_name,skill_type,skill_number')->select();
-        $data['skillInfo'] = $this->dataGroup($skillInfo, 'skill_type');
-        return jsonResult('', 200, $data);
     }
 
 }
