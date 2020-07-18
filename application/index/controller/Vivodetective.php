@@ -62,7 +62,6 @@ class Vivodetective extends Conmmon
             ->where(['user_id' => $this->user_id])
             ->find();
         $userInfo['role'] = empty($userInfo['role']) ? [['lv' => 0, 'status' => 0], ['lv' => 0, 'status' => 0]] : json_decode($userInfo['role']);
-
         $userInfo['free_num'] = date('Y-m-d', $userInfo['offline_timestamp']) < date('Y-m-d', time()) || empty($userInfo['free_num']) ? 3 : $userInfo['free_num'];
         $userInfo['isDressArr'] = empty($userInfo['isDressArr']) ? [0, 0, 0, 0] : json_decode($userInfo['isDressArr']);
 
@@ -249,15 +248,17 @@ class Vivodetective extends Conmmon
     public function offline()
     {
         if (empty($this->user_id)) return jsonResult('error', 110);
-        $userInfo = input('post.userInfo/a');
+        $userInfo = input('post.userInfo');
+        $userInfo = json_decode($userInfo, true);
+//        return jsonResult('离线成功', 200, $userInfo['role']);
         $upData = [
             'max_pass' => $userInfo['max_pass'],
             'coin' => $userInfo['coin'],
             'energyNum' => $userInfo['energyNum'],
             'dress_value' => $userInfo['dress_value'],
             'free_num' => $userInfo['free_num'],
-            'role' => json_encode($userInfo['role']),
-            'isDressArr' => json_encode($userInfo['isDressArr']),
+            'role' => json_encode($userInfo['role'], JSON_UNESCAPED_UNICODE),
+            'isDressArr' => json_encode($userInfo['isDressArr'], JSON_UNESCAPED_UNICODE),
             'Dress' => json_encode($userInfo['Dress'], JSON_UNESCAPED_UNICODE),
             'offline_date' => $this->date,
             'offline_timestamp' => time()
@@ -265,7 +266,7 @@ class Vivodetective extends Conmmon
 //        dump($upData);
         $db = Db::connect('multi-platform');
         $db->table('VIVO_Detective_user')->where(['user_id' => $this->user_id])->update($upData);
-        return jsonResult('离线成功', 200);
+        return jsonResult('离线成功', 200, $upData);
     }
 
     # 点击签到
