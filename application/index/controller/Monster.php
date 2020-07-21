@@ -124,6 +124,15 @@ class Monster extends Conmmon
       }
       $data['activityInfo'] = $activityInfo;
 
+      # 成就任务
+      $is_achievement = Db::table('Monster_achievement')->where(['user_id' => $this->user_id, 'add_date' => $this->date])->find();
+      if ($is_achievement && $is_achievement != 'null' && $is_achievement['add_date'] == $this->date) {
+         $achievementInfo = json_decode($is_achievement['achievementInfo']);
+      } else {
+         $achievementInfo = Db::table('Monster_achievementList')->select();
+      }
+      $data['achievementInfo'] = $achievementInfo;
+
       # 根据IP地址是否开启误点
       $config = Db::table('Monster_config')->find();
       $isCanErrorClick = $config['isCanErrorClick'];
@@ -176,6 +185,7 @@ class Monster extends Conmmon
       if (empty($this->user_id)) return jsonResult('error', 110);
       $userInfo = input('post.userInfo/a');
       $activityInfo = input('post.activityInfo/a');
+      $achievementInfo = input('post.achievementInfo/a');
       $upData = [
          'coin' => $userInfo['coin'],
          'gouYu' => $userInfo['gouYu'],
@@ -186,7 +196,7 @@ class Monster extends Conmmon
       ];
       Db::table('Monster_user')->where(['user_id' => $this->user_id])->update($upData);
 
-
+      # 每日任务
       $is_activity = Db::table('Monster_activity')->where(['user_id' => $this->user_id])->find();
       $upData1 = [
          'user_id' => $this->user_id,
@@ -197,6 +207,19 @@ class Monster extends Conmmon
          Db::table('Monster_activity')->where(['user_id' => $this->user_id])->update($upData1);
       } else {
          Db::table('Monster_activity')->insert($upData1);
+      }
+
+      # 成就任务
+      $is_achievement = Db::table('Monster_achievement')->where(['user_id' => $this->user_id])->find();
+      $upData1 = [
+         'user_id' => $this->user_id,
+         'achievementInfo' => json_encode($achievementInfo, JSON_UNESCAPED_UNICODE),
+         'add_date' => $this->date,
+      ];
+      if ($is_achievement) {
+         Db::table('Monster_achievement')->where(['user_id' => $this->user_id])->update($upData1);
+      } else {
+         Db::table('Monster_achievement')->insert($upData1);
       }
       return jsonResult('离线成功', 200, $upData);
    }
