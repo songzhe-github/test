@@ -117,7 +117,7 @@ class Monster extends Conmmon
 
       # 每日任务
       $is_activity = Db::table('Monster_activity')->where(['user_id' => $this->user_id, 'add_date' => $this->date])->find();
-      if (($is_activity && $is_activity != 'null') && $is_activity['add_date'] == $this->date) {
+      if ($is_activity['activityInfo'] && $is_activity['activityInfo'] != 'null' && $is_activity['add_date'] == $this->date) {
          $activityInfo = json_decode($is_activity['activityInfo']);
       } else {
          $activityInfo = Db::table('Monster_activityList')->select();
@@ -126,7 +126,7 @@ class Monster extends Conmmon
 
       # 成就任务
       $is_achievement = Db::table('Monster_achievement')->where(['user_id' => $this->user_id, 'add_date' => $this->date])->find();
-      if ($is_achievement && $is_achievement != 'null' && $is_achievement['add_date'] == $this->date) {
+      if ($is_achievement['achievementInfo'] && $is_achievement['achievementInfo'] != 'null' && $is_achievement['add_date'] == $this->date) {
          $achievementInfo = json_decode($is_achievement['achievementInfo']);
       } else {
          $achievementInfo = Db::table('Monster_achievementList')->select();
