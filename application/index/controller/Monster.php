@@ -55,64 +55,77 @@ class Monster extends Conmmon
       $userInfo = Db::table('Monster_user')->field('openid,add_date', true)->where(['user_id' => $this->user_id])->find();
 
       # 用户的店员信息
-      $clerk_config = config('monster_config_clerk');
-      $clerk = [];
-      foreach ($clerk_config as $clerk_key => $clerk_value) {
-         foreach ($clerk_value['list'] as $clerk_key1 => $clerk_value1) {
-            if ($clerk_value1['status'] >= 1) {
-               $arr['clerk_lv'] = 0;
-               $arr['clerk_plus'] = 0.1;
-               $arr['clerk_floor'] = null;
-               $arr['clerk_position'] = null;
-               $arr['clerk_level'] = $clerk_value['clerk_level'];
-               $arr['clerk_name'] = $clerk_value1['clerk_name'];
-               $arr['status'] = $clerk_value1['status'];
-               $clerk[$clerk_key][] = $arr;
+      if (empty($userInfo['clerkInfo'])) {
+         $clerk_config = config('monster_config_clerk');
+         $clerk = [];
+         foreach ($clerk_config as $clerk_key => $clerk_value) {
+            foreach ($clerk_value['list'] as $clerk_key1 => $clerk_value1) {
+               if ($clerk_value1['status'] >= 1) {
+                  $arr['clerk_lv'] = 0;
+                  $arr['clerk_plus'] = 0.1;
+                  $arr['clerk_floor'] = null;
+                  $arr['clerk_position'] = null;
+                  $arr['clerk_level'] = $clerk_value['clerk_level'];
+                  $arr['clerk_name'] = $clerk_value1['clerk_name'];
+                  $arr['status'] = $clerk_value1['status'];
+                  $clerk[$clerk_key][] = $arr;
+               }
             }
          }
+         $clerk[1] = [];
+         $clerk[2] = [];
+         $clerk[3] = [];
+         unset($clerk_config);
+         $userInfo['clerkInfo'] = $clerk;
+      } else {
+         $userInfo['clerkInfo'] = json_decode($userInfo['clerkInfo']);
       }
-      $clerk[1] = [];
-      $clerk[2] = [];
-      $clerk[3] = [];
-      unset($clerk_config);
-      $userInfo['clerkInfo'] = empty($userInfo['clerkInfo']) ? $clerk : json_decode($userInfo['clerkInfo']);
 
       # 小吃配置信息
-      $snack_config = config('monster_config_snack');
-      $snack = [];
-      foreach ($snack_config as $snack_key => $snack_value) {
-         foreach ($snack_value['list'] as $snack_key1 => $snack_value1) {
-            if ($snack_value1['status'] >= 1) {
-               $arr1['snack_name'] = $snack_value1['snack_name'];
-               $arr1['snack_coin'] = $snack_value1['snack_coin'];
-               $arr1['snack_gouYu'] = $snack_value1['snack_gouYu'];
-               $arr1['snack_position'] = $snack_value1['snack_name'] == '臭豆腐' ? 1 : null;
-               $arr1['status'] = $snack_value1['status'];
-               $snack[$snack_key][] = $arr1;
+      if (empty($userInfo['snackInfo'])) {
+         $snack_config = config('monster_config_snack');
+         $snack = [];
+         foreach ($snack_config as $snack_key => $snack_value) {
+            foreach ($snack_value['list'] as $snack_key1 => $snack_value1) {
+               if ($snack_value1['status'] >= 1) {
+                  $arr1['snack_name'] = $snack_value1['snack_name'];
+                  $arr1['snack_coin'] = $snack_value1['snack_coin'];
+                  $arr1['snack_gouYu'] = $snack_value1['snack_gouYu'];
+                  $arr1['snack_position'] = $snack_value1['snack_name'] == '臭豆腐' ? 1 : null;
+                  $arr1['status'] = $snack_value1['status'];
+                  $snack[$snack_key][] = $arr1;
+               }
             }
          }
+         $snack[1] = [];
+         $snack[2] = [];
+         unset($snack_config);
+         $userInfo['snackInfo'] = $snack;
+      } else {
+         $userInfo['snackInfo'] = json_decode($userInfo['snackInfo']);
       }
-      $snack[1] = [];
-      $snack[2] = [];
-      unset($snack_config);
-      $userInfo['snackInfo'] = empty($userInfo['snackInfo']) ? $snack : json_decode($userInfo['snackInfo']);
 
       # 装修配置信息
-      $decoration_config = config('monster_config_decoration');
-      $decoration = [];
-      foreach ($decoration_config as $decoration_key => $decoration_value) {
-         if ($decoration_value['status'] >= 1) {
-            $arr2['decoration_lv'] = 0;
-            $arr2['decoration_floor'] = 0.1;
-            $arr2['status'] = $decoration_value['status'];
-            $decoration[] = $arr2;
+      if (empty($userInfo['decorationInfo'])) {
+         $decoration_config = config('monster_config_decoration');
+         $decoration = [];
+         foreach ($decoration_config as $decoration_key => $decoration_value) {
+            if ($decoration_value['status'] >= 1) {
+               $arr2['decoration_lv'] = 0;
+               $arr2['decoration_floor'] = 0.1;
+               $arr2['status'] = $decoration_value['status'];
+               $decoration[] = $arr2;
+            }
          }
+         $decoration[1] = [];
+         $decoration[2] = [];
+         $decoration[3] = [];
+         unset($snack_config);
+         $userInfo['decorationInfo'] = $decoration;
+      } else {
+         $userInfo['decorationInfo'] = json_decode($userInfo['decorationInfo']);
       }
-      $decoration[1] = [];
-      $decoration[2] = [];
-      $decoration[3] = [];
-      unset($snack_config);
-      $userInfo['decorationInfo'] = empty($userInfo['decorationInfo']) ? $decoration : json_decode($userInfo['decorationInfo']);
+
       $data['userInfo'] = $userInfo;
 
       # 每日任务
@@ -260,7 +273,7 @@ class Monster extends Conmmon
       return jsonResult('记录成功', 200);
    }
 
-   public function activityList()
+   public function demo()
    {
       # 每日任务
       $is_activity = Db::table('Monster_activity')->where(['user_id' => $this->user_id, 'add_date' => $this->date])->find();
