@@ -37,7 +37,7 @@ class Vivodetective extends Conmmon
                'add_date' => date('Y-m-d'),
                'add_timestamp' => time(),
                'energyNum' => 10,
-               'is_impower' => 0,
+               'is_newplayer' => 0,
             ];
             $uid = $db->table('VIVO_Detective_user')->insertGetId($arr);
             $res['mstr'] = lock_url($data['openId'] . ',' . $uid);
