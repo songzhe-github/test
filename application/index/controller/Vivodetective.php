@@ -30,13 +30,12 @@ class Vivodetective extends Conmmon
          $db = Db::connect('multi-platform');
          $user = $db->table('VIVO_Detective_user')->field('user_id,openid')->where(['openid' => $data['openId']])->find();
          if (empty($user)) {
-//                $num = substr(time(), -6);
             $arr = [
                'openid' => $data['openId'],
                'user_name' => $data['nickName'],
                'add_date' => date('Y-m-d'),
                'add_timestamp' => time(),
-               'energyNum' => 10,
+               'energyNum' => 5,
                'is_newplayer' => 0,
             ];
             $uid = $db->table('VIVO_Detective_user')->insertGetId($arr);
@@ -66,17 +65,24 @@ class Vivodetective extends Conmmon
       $userInfo['isDressArr'] = empty($userInfo['isDressArr']) ? [0, 0, 0, 0] : json_decode($userInfo['isDressArr']);
 
       // 数据库默认家具
-      $roleArr = $db->table('VIVO_Detective_config_furniture')->field('id,furniture_id,status')->order('furniture_id')->select();
-      $roleArr = dataGroup($roleArr, 'furniture_id');
-      $DressClassArr['Sofa'] = $roleArr[0];
-      $DressClassArr['Drink'] = $roleArr[1];
-      $DressClassArr['Floor'] = $roleArr[2];
-      $DressClassArr['Wall'] = $roleArr[3];
+      $json_string = file_get_contents('json/Tdetective_config_furniture.json');
+      $furnitureArr = json_decode($json_string, true);
+      foreach ($furnitureArr as $k => $v) {
+         foreach ($v as $kk => $vv) {
+            if ($kk == 'furniture_name' || $kk == 'furniture_energyNum' || $kk == 'furniture_unlock_coin' || $kk == 'furniture_up_coin' || $kk == 'furniture_output_vit' || $kk == 'furniture_big_pic' || $kk == 'furniture_small_pic') {
+               unset($furnitureArr[$k][$kk]);
+            }
+         }
+      }
+      $furnitureArr = dataGroup($furnitureArr, 'furniture_id');
+      $DressClassArr['Drink'] = $furnitureArr[0];
+      $DressClassArr['Sofa'] = $furnitureArr[1];
+      $DressClassArr['Floor'] = $furnitureArr[2];
+      $DressClassArr['Wall'] = $furnitureArr[3];
       if (empty($userInfo['Dress'])) {
          // 新用户
          $userInfo['Dress'] = $DressClassArr;
       } else {
-
          $UserDressArr1 = json_decode($userInfo['Dress'], true);
          foreach ($DressClassArr as $DressArr_key => $DressArr_value) {
             foreach ($UserDressArr1 as $UserDressArr_key1 => $UserDressArr_value1) {
@@ -120,12 +126,13 @@ class Vivodetective extends Conmmon
       $data['Role'] = dataGroup($roleArray, 'role_id');
 
       # 家具配置
-      $roleArray = $db->table('VIVO_Detective_config_furniture')->field('id', true)->order('furniture_id')->select();
-      $roleArray = dataGroup($roleArray, 'furniture_id');
-      $furnitureClassArr['Sofa'] = $roleArray[0];
-      $furnitureClassArr['Drink'] = $roleArray[1];
-      $furnitureClassArr['Floor'] = $roleArray[2];
-      $furnitureClassArr['Wall'] = $roleArray[3];
+      $json_string = file_get_contents('json/Tdetective_config_furniture.json');
+      $furnitureArray = json_decode($json_string, true);
+      $furnitureArray = dataGroup($furnitureArray, 'furniture_id');
+      $furnitureClassArr['Drink'] = $furnitureArray[0];
+      $furnitureClassArr['Sofa'] = $furnitureArray[1];
+      $furnitureClassArr['Floor'] = $furnitureArray[2];
+      $furnitureClassArr['Wall'] = $furnitureArray[3];
       $data['Dress'] = $furnitureClassArr;
 
       # 签到列表
@@ -180,7 +187,6 @@ class Vivodetective extends Conmmon
       $data['rankDress'] = $rank_dress;
       $user['ranking'] = $ranking1;
       $data['userRankDress'] = $user;
-
 
       # 根据IP地址是否开启误点
       $config = $db->table('VIVO_Detective_config')->find();
@@ -389,52 +395,7 @@ class Vivodetective extends Conmmon
 
    public function demo()
    {
-      $db = Db::connect('multi-platform');
-      $userInfo = $db->table('VIVO_Detective_user')
-         ->field('openid,add_date,add_timestamp,offline_date,offline_timestamp', true)
-         ->where(['user_id' => $this->user_id])
-         ->find();
 
-      // 数据库默认家具
-      $roleArr = $db->table('VIVO_Detective_config_furniture')->field('id,furniture_id,status')->order('furniture_id')->select();
-      $roleArr = dataGroup($roleArr, 'furniture_id');
-      $DressClassArr['Sofa'] = $roleArr[0];
-      $DressClassArr['Drink'] = $roleArr[1];
-      $DressClassArr['Floor'] = $roleArr[2];
-      $DressClassArr['Wall'] = $roleArr[3];
-      if (empty($userInfo['Dress'])) {
-         // 新用户
-         $userInfo['Dress'] = $DressClassArr;
-      } else {
-
-         $UserDressArr1 = json_decode($userInfo['Dress'], true);
-         foreach ($DressClassArr as $DressArr_key => $DressArr_value) {
-            foreach ($UserDressArr1 as $UserDressArr_key1 => $UserDressArr_value1) {
-               if ($DressArr_key == $UserDressArr_key1) {
-                  foreach ($DressArr_value as $kk1 => $vv1) {
-                     foreach ($UserDressArr_value1 as $kk2 => $vv2) {
-                        if ($vv1['id'] == $vv2['id']) {
-                           $DressClassArr[$DressArr_key][$kk1]['status'] = $vv2['status'];
-                        }
-                     }
-                  }
-               }
-            }
-         }
-         $userInfo['Dress'] = $DressClassArr;
-      }
-
-      // 家具配置
-      $roleArray = $db->table('VIVO_Detective_config_furniture')->field('id', true)->order('furniture_id')->select();
-      $roleArray = dataGroup($roleArray, 'furniture_id');
-      $DressArray['Sofa'] = $roleArray[0];
-      $DressArray['Drink'] = $roleArray[1];
-      $DressArray['Floor'] = $roleArray[2];
-      $DressArray['Wall'] = $roleArray[3];
-      $data['Dress'] = $DressArray;
-
-
-      return jsonResult('', 200, $userInfo);
    }
 
 }
