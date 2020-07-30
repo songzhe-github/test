@@ -1,0 +1,90 @@
+[
+  {
+    "id": 1,
+    "furniture_id": 1,
+    "furniture_name": "饮水机",
+    "furniture_unlock_coin": 0,
+    "furniture_output_vit": 0,
+    "furniture_big_pic": "images/dressPic/Drink/big/1.png",
+    "furniture_small_pic": "images/dressPic/Drink/small/1.png",
+    "furniture_energyNum": 0,
+    "status": 1
+  },
+  {
+    "id": 2,
+    "furniture_id": 1,
+    "furniture_name": "饮水机",
+    "furniture_unlock_coin": 20000,
+    "furniture_output_vit": 50,
+    "furniture_big_pic": "images/dressPic/Drink/big/2.png",
+    "furniture_small_pic": "images/dressPic/Drink/small/2.png",
+    "furniture_energyNum": 3,
+    "status": 0
+  },
+  {
+    "id": 3,
+    "furniture_id": 2,
+    "furniture_name": "沙发椅",
+    "furniture_unlock_coin": 0,
+    "furniture_output_vit": 0,
+    "furniture_big_pic": "images/dressPic/Sofa/big/1.png",
+    "furniture_small_pic": "images/dressPic/Sofa/small/1.png",
+    "furniture_energyNum": 0,
+    "status": 1
+  },
+  {
+    "id": 4,
+    "furniture_id": 2,
+    "furniture_name": "沙发椅",
+    "furniture_unlock_coin": 40000,
+    "furniture_output_vit": 100,
+    "furniture_big_pic": "images/dressPic/Sofa/big/2.png",
+    "furniture_small_pic": "images/dressPic/Sofa/small/2.png",
+    "furniture_energyNum": 5,
+    "status": 0
+  },
+  {
+    "id": 5,
+    "furniture_id": 3,
+    "furniture_name": "木地板",
+    "furniture_unlock_coin": 0,
+    "furniture_output_vit": 0,
+    "furniture_big_pic": "images/dressPic/Floor/big/1.png",
+    "furniture_small_pic": "images/dressPic/Floor/small/1.png",
+    "furniture_energyNum": 0,
+    "status": 1
+  },
+  {
+    "id": 6,
+    "furniture_id": 3,
+    "furniture_name": "木地板",
+    "furniture_unlock_coin": 60000,
+    "furniture_output_vit": 150,
+    "furniture_big_pic": "images/dressPic/Floor/big/2.png",
+    "furniture_small_pic": "images/dressPic/Floor/small/2.png",
+    "furniture_energyNum": 8,
+    "status": 0
+  },
+  {
+    "id": 7,
+    "furniture_id": 4,
+    "furniture_name": "环保墙漆",
+    "furniture_unlock_coin": 0,
+    "furniture_output_vit": 0,
+    "furniture_big_pic": "images/dressPic/Wall/big/1.png",
+    "furniture_small_pic": "images/dressPic/Wall/small/1.png",
+    "furniture_energyNum": 0,
+    "status": 1
+  },
+  {
+    "id": 8,
+    "furniture_id": 4,
+    "furniture_name": "环保墙漆",
+    "furniture_unlock_coin": 80000,
+    "furniture_output_vit": 200,
+    "furniture_big_pic": "images/dressPic/Wall/big/2.png",
+    "furniture_small_pic": "images/dressPic/Wall/small/2.png",
+    "furniture_energyNum": 10,
+    "status": 0
+  }
+]
