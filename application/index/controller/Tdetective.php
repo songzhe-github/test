@@ -35,7 +35,7 @@ class Tdetective extends Conmmon
                'add_timestamp' => time(),
                'energyNum' => 5,
                'free_num' => 3,
-               'is_impower' => 0,
+               'is_newplayer' => 0,
             ];
             $uid = Db::table('TT_Detective_user')->insertGetId($arr);
             $res['mstr'] = lock_url($data['openid'] . ',' . $uid);
