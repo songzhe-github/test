@@ -99,32 +99,37 @@
          }
          $data['userInfo'] = $userInfo;
 
-         # 关卡配置
+
+         # config配置表
+         $config = Db::table('Detective_config')->find();
+         if ($config['all_configInfo_status'] == 1) {
+            # 关卡配置
 //         $passInfo = Db::table('Detective_config_passInfo')->field('detective_id', true)->order('pass_id,question_id')->select();
-         $json_string = file_get_contents('json/Tdetective_config_passInfo.json');
-         $passInfo = json_decode($json_string, true);
+            $json_string = file_get_contents('json/Tdetective_config_passInfo.json');
+            $passInfo = json_decode($json_string, true);
 
-         $passInfoArr = dataGroup($passInfo, 'pass_id');
-         foreach ($passInfoArr as $kk => $vv) {
-            foreach ($vv as $key => $value) {
-               if (empty($value['answer'])) continue;
+            $passInfoArr = dataGroup($passInfo, 'pass_id');
+            foreach ($passInfoArr as $kk => $vv) {
+               foreach ($vv as $key => $value) {
+                  if (empty($value['answer'])) continue;
 
-               $answerArr = explode(',', $value['answer']);
-               $answer['posX'] = (int)$answerArr[0];
-               $answer['posY'] = (int)$answerArr[1];
-               $answer['radius'] = (int)$answerArr[2];
-               $passInfoArr[$kk][$key]['answer'] = $answer;
+                  $answerArr = explode(',', $value['answer']);
+                  $answer['posX'] = (int)$answerArr[0];
+                  $answer['posY'] = (int)$answerArr[1];
+                  $answer['radius'] = (int)$answerArr[2];
+                  $passInfoArr[$kk][$key]['answer'] = $answer;
 
-               $prizeArr = explode(',', $value['prize']);
-               $prize['coin_num'] = (int)$prizeArr[0];
-               $passInfoArr[$kk][$key]['prize'] = $prize;
+                  $prizeArr = explode(',', $value['prize']);
+                  $prize['coin_num'] = (int)$prizeArr[0];
+                  $passInfoArr[$kk][$key]['prize'] = $prize;
+               }
             }
-         }
-         $data['PassInfo'] = $passInfoArr;
+            $data['PassInfo'] = $passInfoArr;
 
-         # 探员配置
-         $roleArray = Db::table('Detective_config_role')->field('id', true)->select();
-         $data['Role'] = dataGroup($roleArray, 'role_id');
+            # 探员配置
+            $roleArray = Db::table('Detective_config_role')->field('id', true)->select();
+            $data['Role'] = dataGroup($roleArray, 'role_id');
+         }
 
          # 家具配置
          $json_string = file_get_contents('json/Tdetective_config_furniture.json');
@@ -191,7 +196,6 @@
          $data['userRankDress'] = $user;
 
          # 根据IP地址是否开启误点
-         $config = Db::table('Detective_config')->find();
          $isCanErrorClick = $config['isCanErrorClick'];
          if ($isCanErrorClick == 1) {
             $IP = request()->ip(0, true);
