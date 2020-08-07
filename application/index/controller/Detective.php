@@ -19,11 +19,14 @@
       public function getCode()
       {
          if (request()->isPost()) {
+
+
             $code = input('post.code');
             if (empty($code)) return jsonResult('你瞅啥', 100);
-            $appid = 'wx8dcbff5663b9b92a';
-            $appsecret = '288d19b4450ec45f699e2563f802fe22';
+            $appid = 'wxca069ca328f64bc9';
+            $appsecret = 'e10dd26475bd9fbb0d939f1c54a94aeb';
             $data = $this->getOpenid($appid, $appsecret, $code); // 获得 openid 和 session_key
+//            return jsonResult('succ',200,$data);
 
             $user = Db::table('Detective_user')->field('user_id,openid')->where(['openid' => $data['openid']])->find();
             if (empty($user)) {
@@ -195,6 +198,15 @@
          $user['ranking'] = $ranking1;
          $data['userRankDress'] = $user;
 
+         # 九宫格
+         $app = Db::Table('Detective_app')
+            ->field('id,app_id,app_name,app_url,page,play_status,status,sort')
+            ->where('status', 0)
+            ->order('sort')
+            ->select();
+         $data['app'] = $app;
+
+
          # 根据IP地址是否开启误点
          $isCanErrorClick = $config['isCanErrorClick'];
          if ($isCanErrorClick == 1) {
@@ -309,9 +321,8 @@
          if (empty($this->user_id)) return jsonResult('error', 110);
          $post = request()->only(['channel', 'scene', 'enter_id'], 'post'); //channel 渠道ID 例如：1001  scene 场景值 enter_id 来源小程序ID
          $post['enter_id'] = $post['enter_id'] ? $post['enter_id'] : 666;
-         $date = date('Y-m-d');
 
-         $record_channel_id = Db::table('Detective_record_channel')->where(['user_id' => $this->user_id, 'add_date' => $date])->value('record_channel_id');
+         $record_channel_id = Db::table('Detective_record_channel')->where(['user_id' => $this->user_id, 'add_date' => $this->date])->value('record_channel_id');
          if (empty($record_channel_id)) {
             # 用户从哪个渠道进入
             $record = [
@@ -319,7 +330,7 @@
                'enter_id' => $post['enter_id'],
                'channel_id' => $post['channel'],
                'scene' => $post['scene'],
-               'add_date' => $date,
+               'add_date' => $this->date,
                'add_time' => date('Y-m-d H:i:s'),
             ];
             Db::table('Detective_record_channel')->insert($record);
@@ -359,20 +370,6 @@
             ];
             Db::table('Detective_statistics_adv')->insert($advData);
 
-            if ($post['status'] == 1) {
-               # 广告限量
-               $restrict_id = Db::table('Detective_restrict')->where(['app_id' => $app_id, 'add_time' => $date])->value('restrict_id');
-               if (empty($restrict_id)) {
-                  $addData = [
-                     'app_id' => $app_id,
-                     'num' => 1,
-                     'add_time' => $date,
-                  ];
-                  Db::table('Detective_restrict')->insert($addData);
-               } else {
-                  Db::table('Detective_restrict')->where(['restrict_id' => $restrict_id])->setInc('num');
-               }
-            }
             return jsonResult('点击广告记录成功', 200);
          } else {
             return jsonResult('今天广告已记录过', 100);
