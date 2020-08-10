@@ -204,8 +204,15 @@
             ->where('status', 0)
             ->order('sort')
             ->select();
+         $adv = Db::table('Detective_information_adv')->field('app_id,click_count')->where('date', date('Y-m-d', strtotime('-1day')))->select();
+         foreach ($app as $app_key => $app_value) {
+            foreach ($adv as $adv_key => $adv_value) {
+               if ($app_value['id'] === $adv_value['app_id']) {
+                  $app[$app_key]['num'] = $adv_value['click_count'] * 999;
+               }
+            }
+         }
          $data['app'] = $app;
-
 
          # 根据IP地址是否开启误点
          $isCanErrorClick = $config['isCanErrorClick'];
@@ -390,8 +397,23 @@
 
       public function demo()
       {
-         $db = Db::table('TT_Detective_user')->where(['add_date' => $this->date])->select();
-         dump($db);
+         # 九宫格
+         $app = Db::Table('Detective_app')
+            ->field('id,app_id,app_name,app_url,page,play_status,status,sort')
+            ->where('status', 0)
+            ->order('sort')
+            ->select();
+         $adv = Db::table('Detective_information_adv')->field('app_id,click_count')->where('date', date('Y-m-d', strtotime('-1day')))->select();
+
+         foreach ($app as $app_key => $app_value) {
+            foreach ($adv as $adv_key => $adv_value) {
+               if ($app_value['id'] === $adv_value['app_id']) {
+                  $app[$app_key]['num'] = $adv_value['click_count'] * 999;
+               }
+            }
+         }
+         halt($app);
+
       }
 
    }
